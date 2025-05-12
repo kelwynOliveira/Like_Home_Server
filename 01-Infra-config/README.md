@@ -172,5 +172,3 @@ Docker volumes are stored on an external SSD for persistence.
 [📡 Static IP setup](./static_ip.md)
 
 [🌐 Networking Setup](./networking.md)
-
-Next step? Add a `03-networking` section to document your [📡 Static IP setup](#), DNS server, or internal HTTPS routing (e.g. Traefik + TLS via mkcert or step-ca).
