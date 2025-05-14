@@ -2,6 +2,7 @@
 
 Needed:
 [📡 Static IP setup](./static_ip.md)
+[🐳 Docker & Portainer Setup](../02-docker/README.md)
 
 This guide explains how to:
 
@@ -51,6 +52,8 @@ sudo nano /etc/resolv.conf
 5. Add DNSs:
 
 ```bash
+nameserver 192.168.1.51
+nameserver 192.168.1.50
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 nameserver 1.1.1.1
@@ -72,6 +75,7 @@ services:
   coredns:
     image: coredns/coredns
     container_name: coredns
+    restart: unless-stopped
     ports:
       - "53:53/udp"
     volumes:
@@ -84,16 +88,25 @@ services:
 like:53 {
   log
   errors
+  reload
 
   template IN A {
     match .*\.like
     answer "{{ .Name }} 60 IN A 192.168.1.50"
+    answer "{{ .Name }} 60 IN A 192.168.1.51"
   }
 
   template IN A {
     match ^like$
-    answer "like 60 IN A 192.168.1.50"
+    answer "{{ .Name }} 60 IN A 192.168.1.50"
+    answer "{{ .Name }} 60 IN A 192.168.1.51"
   }
+
+}
+
+.:53 {
+  errors
+  reload
 
   forward . 8.8.8.8 1.1.1.1
 }
@@ -110,13 +123,16 @@ docker-compose up -d
 
 On another device:
 
+> ⚠️ To make it the default resolver for the client (dev machine), set DNS manually in your OS or router (point to `192.168.1.50` or `192.168.1.51`).
+
 ```bash
+dig @192.168.1.51 home.like
 dig @192.168.1.50 home.like
+dig @192.168.1.51 google.com
+dig @192.168.1.50 google.com
 ```
 
-You should get `192.168.1.50` as a response.
-
-To make it the default resolver for the client (dev machine), set DNS manually in your OS or router (point to `192.168.1.50`).
+You should get `192.168.1.50` or `192.168.1.51` as a response.
 
 ---
 
@@ -171,7 +187,7 @@ To access domains like `http://home.like` from your personal computer, follow th
    Open your browser and access:
 
    ```url
-   http://home.like:9000
+   http://home.like
    ```
 
    Or test via terminal:
@@ -201,8 +217,16 @@ services:
       - --providers.docker.exposedbydefault=false
       - --api.dashboard=true
       - --log.level=DEBUG
+      - --api.insecure=true
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.like`)"
+      - "traefik.http.routers.traefik.entrypoints=web"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik.service=api@internal"
     ports:
       - "80:80"
+      - "443:443"
       - "8080:8080" # Traefik dashboard
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

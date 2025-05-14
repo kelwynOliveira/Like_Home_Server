@@ -24,4 +24,4 @@
 ## Index
 
 1. [Ubuntu Server installation & setup](./01-Infra-config/README.md)
-2. [Docker & Docker Compose](./02-Docker/README.md)
+1. [Docker & Portainer](./02-Docker/README.md)
