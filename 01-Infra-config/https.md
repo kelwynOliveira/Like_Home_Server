@@ -32,6 +32,13 @@ sudo mv mkcert-v*-linux-amd64 /usr/local/bin/mkcert
 mkcert -install
 ```
 
+1. Generate certificates for your local domain:
+
+   ```bash
+   mkcert like "*.like"
+   mv like+1.pem cert.pem
+   mv like+1-key.pem key.pem
+
 ---
 
 #### 🖥️ On Your Server (Traefik Host)
@@ -39,9 +46,9 @@ mkcert -install
 1. Generate certificates for your local domain:
 
    ```bash
-   mkcert home.like '*.home.like'
-   mv home.like+1.pem cert.pem
-   mv home.like+1-key.pem key.pem
+   mkcert like "*.like"
+   mv _wildcard.like.pem cert.pem
+   mv _wildcard.like-key.pem key.pem
    ```
 
 2. Move them to a shared volume (e.g. `/mnt/ssd/data/certs`):

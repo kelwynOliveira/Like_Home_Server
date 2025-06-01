@@ -68,6 +68,66 @@ A complete guide to setting up a local home server for development, automation, 
 
 ---
 
+## 💤 Lid & Display Behavior
+
+Ensure the server remains **active when the lid is closed**, while also **turning off the display after inactivity**:
+
+### 🛑 Prevent Suspend on Lid Close
+
+Edit the logind configuration:
+
+```bash
+sudo nano /etc/systemd/logind.conf
+```
+
+Set:
+
+```ini
+HandleLidSwitch=ignore
+HandleLidSwitchDocked=ignore
+```
+
+Restart the service:
+
+```bash
+sudo systemctl restart systemd-logind
+```
+
+---
+
+### 🌙 Turn Off Screen After Inactivity
+
+Create or edit `/etc/rc.local` to configure screen blanking:
+
+```bash
+sudo nano /etc/rc.local
+```
+
+Add before `exit 0`:
+
+```bash
+setterm --blank 5 --powerdown 10 --powersave on < /dev/tty0
+exit 0
+```
+
+Then make the file executable:
+
+```bash
+sudo chmod +x /etc/rc.local
+```
+
+📝 **Explanation**:
+
+- `--blank 5` → turn off screen after 5 minutes
+- `--powerdown 10` → reduce power after 10 minutes
+- `--powersave on` → enter power save mode
+
+---
+
+> ✅ Result: lid closed = screen off, system alive.
+> ⏱️ No interaction = screen turns off.
+> 🔼 Lid opened or key press = screen turns on.
+
 ## 🐳 Docker Installation
 
 ```bash
