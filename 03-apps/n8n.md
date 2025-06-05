@@ -9,8 +9,6 @@ This setup runs multiple isolated instances of [n8n](https://n8n.io/) on a singl
 Here's the `docker-compose.yml` configuration to run 3 n8n instances, each with its own persistent volume and domain (optional).
 
 ```yaml
-version: "3.8"
-
 services:
   n8n:
     image: n8nio/n8n:latest
