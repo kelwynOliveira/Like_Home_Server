@@ -18,6 +18,7 @@ services:
       - "5678:5678"
     environment:
       - TZ=America/Sao_Paulo
+      - GENERIC_TIMEZONE=America/Sao_Paulo
       - N8N_SECURE_COOKIE=false
       - WEBHOOK_URL=http://n8n.like/
     volumes:
@@ -41,6 +42,7 @@ services:
       - "5679:5678"
     environment:
       - TZ=America/Sao_Paulo
+      - GENERIC_TIMEZONE=America/Sao_Paulo
       - N8N_SECURE_COOKIE=false
       - WEBHOOK_URL=http://n8n-kelwyn.like/
     volumes:
@@ -64,6 +66,7 @@ services:
       - "5680:5678"
     environment:
       - TZ=America/Sao_Paulo
+      - GENERIC_TIMEZONE=America/Sao_Paulo
       - N8N_SECURE_COOKIE=false
       - WEBHOOK_URL=http://n8n-lidia.like/
     volumes:
