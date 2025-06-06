@@ -32,8 +32,6 @@ We'll deploy **Portainer CE** (Community Edition) using Docker Compose.
 ### 📄 `docker-compose.yml`
 
 ```yaml
-version: "3.8"
-
 services:
   portainer:
     image: portainer/portainer-ce:latest

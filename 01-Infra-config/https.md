@@ -38,6 +38,7 @@ mkcert -install
    mkcert like "*.like"
    mv like+1.pem cert.pem
    mv like+1-key.pem key.pem
+   ```
 
 ---
 
@@ -61,8 +62,6 @@ mkcert -install
 3. In your `docker-compose.yml`, mount the certs expose port `443` and configure Traefik:
 
    ```yaml
-   version: "3.8"
-
    services:
      traefik:
        image: traefik:v2.11
@@ -96,8 +95,6 @@ mkcert -install
 4. Add TLS labels to your services:
 
    ```yaml
-   version: "3"
-
    services:
      whoami:
        image: traefik/whoami
@@ -133,8 +130,6 @@ If you are using a public domain and want valid HTTPS certificates, use Let's En
 #### 1. Configure Traefik to use Let's Encrypt:
 
 ```yaml
-version: "3.8"
-
 services:
   traefik:
     image: traefik:v2.11
@@ -168,8 +163,6 @@ networks:
 #### 2. Add labels to your service/router:
 
 ```yaml
-version: "3"
-
 services:
   whoami:
     image: traefik/whoami

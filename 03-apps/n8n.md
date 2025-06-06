@@ -19,6 +19,7 @@ services:
     environment:
       - TZ=America/Sao_Paulo
       - N8N_SECURE_COOKIE=false
+      - WEBHOOK_URL=http://n8n.like/
     volumes:
       - /home/like-server/docker/apps/n8n/data:/home/node/.n8n
     labels:
@@ -41,6 +42,7 @@ services:
     environment:
       - TZ=America/Sao_Paulo
       - N8N_SECURE_COOKIE=false
+      - WEBHOOK_URL=http://n8n-kelwyn.like/
     volumes:
       - /home/like-server/docker/apps/n8n/data-kelwyn:/home/node/.n8n
     labels:
@@ -63,6 +65,7 @@ services:
     environment:
       - TZ=America/Sao_Paulo
       - N8N_SECURE_COOKIE=false
+      - WEBHOOK_URL=http://n8n-lidia.like/
     volumes:
       - /home/like-server/docker/apps/n8n/data-lidia:/home/node/.n8n
     labels:
