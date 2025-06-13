@@ -2,11 +2,15 @@
 
 Needed:
 [📡 Static IP setup](./static_ip.md)
-[🐳 Docker & Portainer Setup](../02-docker/README.md)
+[🐳 Docker Installation](.README.md#-docker-installation)
+
+Optional (Portainer)
+[🐳 Portainer Setup for Docker UI](../02-docker/README.md)
 
 This guide explains how to:
 
-- 🧭 Use **CoreDNS** to resolve internal domains (e.g. `home.like`)
+- 🧭 Use **CoreDNS** to resolve internal domains (e.g. `home.like`).
+  > The .like TLD is a personalized touch, combining my wife Lídia's name with mine, Kelwyn.
 - 🚦 Configure **Traefik** as a reverse proxy
 - 🔐 Optionally add **HTTPS** with internal certificates
 
@@ -52,8 +56,8 @@ sudo nano /etc/resolv.conf
 5. Add DNSs:
 
 ```bash
-nameserver 192.168.1.51
 nameserver 192.168.1.50
+nameserver 192.168.1.51
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 nameserver 1.1.1.1
@@ -65,23 +69,6 @@ nameserver 1.1.1.1
 sudo systemctl restart docker
 ```
 
-### 📦 Docker compose (Basic)
-
-```yaml
-# docker/coredns/docker-compose.yml
-version: "3.7"
-
-services:
-  coredns:
-    image: coredns/coredns
-    container_name: coredns
-    restart: unless-stopped
-    ports:
-      - "53:53/udp"
-    volumes:
-      - ./Corefile:/Corefile
-```
-
 ### 📝 Corefile (DNS Config)
 
 ```hcl
@@ -91,15 +78,8 @@ like:53 {
   reload
 
   template IN A {
-    match .*\.like
-    answer "{{ .Name }} 60 IN A 192.168.1.50"
-    answer "{{ .Name }} 60 IN A 192.168.1.51"
-  }
-
-  template IN A {
-    match ^like$
-    answer "{{ .Name }} 60 IN A 192.168.1.50"
-    answer "{{ .Name }} 60 IN A 192.168.1.51"
+    match ^(.+\.)like
+    answer "{{ .Name }} 60 IN A 192.168.1.100"
   }
 
 }
@@ -108,8 +88,27 @@ like:53 {
   errors
   reload
 
-  forward . 8.8.8.8 1.1.1.1
+  forward . 192.168.1.100:8053
 }
+```
+
+> - The 192.168.1.100:8053 address directs queries to Pi-hole ([🚫 Pi-hole DNS Ad Blocker Setup](./pihole.md)). You can easily swap this with any other DNS server (e.g., 8.8.8.8, 1.1.1.1, or your router's IP) if you prefer not to use Pi-hole.
+> - This means any query not for '.like' will be sent to your Pi-hole (or similar)
+
+### 📦 Docker compose (Basic)
+
+```yaml
+# docker/coredns/docker-compose.yml
+services:
+  coredns:
+    image: coredns/coredns
+    container_name: coredns
+    restart: unless-stopped
+    ports:
+      - "53:53/tcp"
+      - "53:53/udp"
+    volumes:
+      - ./Corefile:/Corefile
 ```
 
 ### ▶️ Start
@@ -123,7 +122,7 @@ docker-compose up -d
 
 On another device:
 
-> ⚠️ To make it the default resolver for the client (dev machine), set DNS manually in your OS or router (point to `192.168.1.50` or `192.168.1.51`).
+> ⚠️ To make it the default resolver for the client (dev machine), set DNS manually in your OS or router (point to `192.168.1.50` or `192.168.1.51`) [Set DNS on your personal device (dev machine)](./networking.md#-set-dns-on-your-personal-device-dev-machine).
 
 ```bash
 dig @192.168.1.51 home.like
@@ -196,16 +195,18 @@ To access domains like `http://home.like` from your personal computer, follow th
    dig home.like
    ```
 
+---
+
 ## 🚦 Step 3: Traefik Reverse Proxy
 
 Allows routing requests like `http://home.like` to the correct container.
+
+[traefik releases](https://doc.traefik.io/traefik/deprecation/releases/)
 
 ### 📦 Docker compose
 
 ```yaml
 # docker/traefik/docker-compose.yml
-version: "3.8"
-
 services:
   traefik:
     image: traefik:v2.11
@@ -243,8 +244,6 @@ networks:
 
 ```yaml
 # docker/whoami/docker-compose.yml
-version: "3"
-
 services:
   whoami:
     image: traefik/whoami
@@ -274,3 +273,8 @@ docker-compose -f docker/whoami/docker-compose.yml up -d
 ```
 
 Now open `http://home.like` in your browser.
+
+---
+
+Next: [🚫 Pi-hole DNS Ad Blocker Setup](./pihole.md)
+Previous: [📡 Static IP setup](./static_ip.md)

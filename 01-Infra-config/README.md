@@ -2,6 +2,12 @@
 
 A complete guide to setting up a local home server for development, automation, and full-cycle infrastructure experiments using **Ubuntu Server** and **Docker**.
 
+1. ⬇️ Ubuntu Server Installation
+1. [📡 Static IP setup](./static_ip.md)
+   (for Internal DNS and Reverse Proxies, ssh, port fowarding, ...)
+1. [🌐 Networking Setup](./networking.md) ()
+1. [🚫 Pi-hole DNS Ad Blocker Setup](./pihole.md)
+
 ---
 
 ## 💻 Hardware Specs
@@ -143,7 +149,7 @@ sudo usermod -aG docker <your-user>
 sudo systemctl restart docker
 ```
 
-> Log out and back in (or run `su <your-user>`) to apply group permissions.
+> Log out and back in `sudo poweroff`, `sudo shutdown -P now` or `sudo init 0` (or run `su <your-user>`) to apply group permissions.
 
 Check Docker is working:
 
@@ -229,6 +235,4 @@ Docker volumes are stored on an external SSD for persistence.
 
 ---
 
-[📡 Static IP setup](./static_ip.md)
-
-[🌐 Networking Setup](./networking.md)
+Next: [📡 Static IP setup](./static_ip.md)

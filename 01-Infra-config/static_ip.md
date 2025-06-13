@@ -1,6 +1,6 @@
-# 📡 Static IP Configuration (Ubuntu Server with Wi-Fi)
+# 📡 Static IP Configuration (Ubuntu Server with Ethernet & Wi-Fi)
 
-This guide explains how to configure a **static IP address** on Ubuntu Server using **Netplan**, when connected via Ethernet or Wi-Fi and you don't have access to the router.
+This guide explains how to configure a **static IP address** on Ubuntu Server using **Netplan**, when connected via Ethernet or Wi-Fi and **you don't have access to the router**.
 
 ---
 
@@ -23,6 +23,7 @@ Run the following commands:
 ```bash
 sudo lshw -C network
 ```
+
 search for `logical name`
 
 ```bash
@@ -35,8 +36,9 @@ Note:
 - Your Ethernet interface name (e.g., `enp2s0`)
 - Your Wi-Fi interface name (e.g., `wlp3s0`)
 - Your current gateway IP (e.g., `192.168.1.1`)
-- A static IP you want to assign (e.g., `192.168.1.51` [Ethernet])
-- A static IP you want to assign (e.g., `192.168.1.50` [Wi-Fi])
+- A static IP you want to assign (e.g., `192.168.1.50` [Ethernet])
+- A static IP you want to assign (e.g., `192.168.1.51` [Wi-Fi])
+  > ⚠️ Make sure the IP addresses (`192.168.1.50` or/and `192.168.1.51`) is not used by other devices.
 
 ---
 
@@ -48,6 +50,13 @@ Open or create the Netplan config file:
 sudo nano /etc/netplan/00-installer-config.yaml
 ```
 
+- `metric` to choose priority of connection (e.g. Preferential Ethernet [100] and Wi-Fi as fallback [200] )
+
+Replace:
+
+- `YOUR_WIFI_SSID` with your actual Wi-Fi name
+- `YOUR_WIFI_PASSWORD` with your Wi-Fi password
+
 Paste the following content (replace placeholders):
 
 ```yaml
@@ -57,8 +66,8 @@ network:
   ethernets:
     enp2s0:
       dhcp4: no
-      addresses: [192.168.1.51/24]
-      nameservers:
+      addresses: [192.168.1.50/24]
+      nameservers: # DNSs
         addresses: [8.8.8.8, 1.1.1.1]
       routes:
         - to: default
@@ -67,7 +76,7 @@ network:
   wifis:
     wlp3s0:
       dhcp4: no
-      addresses: [192.168.1.50/24]
+      addresses: [192.168.1.51/24]
       nameservers:
         addresses: [1.1.1.1, 8.8.8.8]
       routes:
@@ -80,15 +89,6 @@ network:
         "YOUR_WIFI_SSID 2":
           password: "YOUR_WIFI_PASSWORD 2"
 ```
-
-- `metric` to choose priority of connection (e.g. Preferential Ethernet [100] and Wi-Fi as fallback [200] )
-
-Replace:
-
-- `YOUR_WIFI_SSID` with your actual Wi-Fi name
-- `YOUR_WIFI_PASSWORD` with your Wi-Fi password
-
-> ⚠️ Make sure the IP addresses (`192.168.1.50` or/and `192.168.1.51`) is not used by other devices.
 
 ---
 
@@ -137,3 +137,8 @@ sudo reboot
 Your Ubuntu Server will now always use the static IP address `192.168.1.50` on your local network.
 
 This is essential for internal DNS, reverse proxies, and local services.
+
+---
+
+Next: [🌐 Networking Setup](./networking.md)
+Previous: [🧰 Infra Setup](./README.md)

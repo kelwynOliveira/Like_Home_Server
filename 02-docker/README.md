@@ -29,6 +29,8 @@ We'll deploy **Portainer CE** (Community Edition) using Docker Compose.
 
 > 💡 Portainer will allow you to manage containers via a web UI at `http://<your-ip>:9000` or using a custom domain like `portainer.like` if you're using a local DNS and reverse proxy like [Traefik](https://doc.traefik.io/traefik/).
 
+> ✅ If you're not using Traefik ([step of Networking Setup](../01-Infra-config/networking.md)), you can safely remove the `labels` and `networks` sections.
+
 ### 📄 `docker-compose.yml`
 
 ```yaml
@@ -56,7 +58,18 @@ networks:
     external: true
 ```
 
-> ✅ If you're not using [Traefik](../01-Infra-config/networking.md), you can safely remove the `labels` and `networks` sections.
+---
+
+## 📂 Volumes & Storage
+
+Make sure the Portainer data folder is persistent and located on a mounted volume:
+
+[💾 Mounting External SSD (Persistent)](../01-Infra-config/README.md#-mounting-external-ssd-persistent)
+
+```bash
+sudo mkdir -p /mnt/ssd/data/portainer
+sudo chown -R 1000:1000 /mnt/ssd/data/portainer
+```
 
 ---
 
@@ -89,15 +102,4 @@ Or, for the most recent version:
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 docker-compose --version
-```
-
----
-
-## 📂 Volumes & Storage
-
-Make sure the Portainer data folder is persistent and located on a mounted volume:
-
-```bash
-sudo mkdir -p /mnt/ssd/data/portainer
-sudo chown -R 1000:1000 /mnt/ssd/data/portainer
 ```
