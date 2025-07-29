@@ -2,6 +2,9 @@
 
 You can enable HTTPS using self-signed certificates for local development (`mkcert`), or automate valid public certificates with **Let's Encrypt**.
 
+- Option 1 - [Local TLS with `mkcert` (Development Only)](#-option-1--local-tls-with-mkcert-development-only)
+- Option 2 - [Automatic HTTPS with Let's Encrypt (Production/Public Domains)](#-option-2--automatic-https-with-lets-encrypt-productionpublic-domains)
+
 ---
 
 ### ✅ Option 1 — Local TLS with `mkcert` (Development Only)
@@ -127,7 +130,27 @@ mkcert -install
 
 If you are using a public domain and want valid HTTPS certificates, use Let's Encrypt via Traefik's built-in resolver.
 
-#### 1. Configure Traefik to use Let's Encrypt:
+I bought the lik3.net domain and I am using Cloudflare (DNS API) to use DNS-01 with automatic Let’s Encrypt.
+
+#### 1. Create Cloudflare API Token for Traefik:
+
+Go to [https://dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens) and click on _Create Token_.
+
+Select the template _Edit Zone DNS_
+
+Then set _Zone Resouces_: include your domain and save the token on a .env in the same folder where the docker compose file is.
+
+```.env
+CF_DNS_API_TOKEN=cloudflare_token
+```
+
+#### 2. Disable proxy (Proxied) for domains using Traefik:
+
+Go to DNS -> Records in Cloudflare for your domain then create a new A or CNAME registers (Add Record) with _Proxy status: DNS only_ for your apps. Content can be any value like `192.168.1.100`, since DNS-01 only uses the domain, it does not test IP.
+
+![cloudflare DNS](../assets/cloudflare-dns.png)
+
+#### 3. Configure Traefik to use Let's Encrypt:
 
 ```yaml
 services:
@@ -136,14 +159,17 @@ services:
     container_name: traefik
     command:
       - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
       - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
       - --api.dashboard=true
       - --log.level=DEBUG
-      - --api.insecure=true
-      - --entrypoints.websecure.address=:443
-      - --certificatesresolvers.letsencrypt.acme.email=you@example.com
-      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
-      - --certificatesresolvers.letsencrypt.acme.tlschallenge=true
+      - --certificatesresolvers.cloudflare.acme.dnschallenge=true
+      - --certificatesresolvers.cloudflare.acme.dnschallenge.provider=cloudflare
+      - --certificatesresolvers.cloudflare.acme.email=your@email.com
+      - --certificatesresolvers.cloudflare.acme.storage=/data/acme.json
+    env_file:
+      - .env
     ports:
       - "80:80"
       - "443:443"
@@ -151,7 +177,13 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/ssd/data/traefik:/data
-      - ./letsencrypt:/letsencrypt # Mount a volume for certificate storage:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.traefik.rule=Host(`traefik.lik3.net`)"
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
+      - "traefik.http.routers.traefik.entrypoints=websecure"
+      - "traefik.http.routers.traefik.tls.certresolver=cloudflare"
+      - "traefik.http.routers.traefik.service=api@internal"
     networks:
       - traefik-net
 
@@ -160,7 +192,16 @@ networks:
     external: true
 ```
 
-#### 2. Add labels to your service/router:
+#### 4. Give permission to `acme.json`:
+
+```
+sudo touch /apps/traefik/data/acme.json
+sudo chmod 600 /apps/traefik/data/acme.json
+```
+
+#### 5. Add labels to your service/router:
+
+Example:
 
 ```yaml
 services:
@@ -180,5 +221,3 @@ networks:
   traefik-net:
     external: true
 ```
-
-**Note:** You must point your domain (e.g. `example.com`) to your public IP address and open ports `80` and `443`.
