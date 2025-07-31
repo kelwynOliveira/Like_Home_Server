@@ -41,7 +41,7 @@ services:
     environment:
       DOMAIN: "https://vaultwarden.lik3.net"
     volumes:
-      - /home/like/data/vaultwarden/data:/data/
+      - /mnt/ssd/vaultwarden/data:/data/
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.vaultwarden.rule=Host(`vaultwarden.lik3.net`)"
