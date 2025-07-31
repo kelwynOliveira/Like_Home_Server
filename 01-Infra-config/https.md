@@ -128,29 +128,44 @@ mkcert -install
 
 ### 🌍 Option 2 — Automatic HTTPS with Let's Encrypt (Production/Public Domains)
 
-If you are using a public domain and want valid HTTPS certificates, use Let's Encrypt via Traefik's built-in resolver.
+If you're using a public domain and want valid HTTPS certificates, you can enable automatic certificate generation via Traefik’s built-in Let's Encrypt resolver.
 
-I bought the lik3.net domain and I am using Cloudflare (DNS API) to use DNS-01 with automatic Let’s Encrypt.
+In this example, I purchased the domain `lik3.net` and configured it with Cloudflare. We'll use the DNS-01 challenge method, which requires access to the DNS provider's API.
 
-#### 1. Create Cloudflare API Token for Traefik:
+---
 
-Go to [https://dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens) and click on _Create Token_.
+#### 1. Create a Cloudflare API Token for Traefik
 
-Select the template _Edit Zone DNS_
+Go to [https://dash.cloudflare.com/profile/api-tokens](https://dash.cloudflare.com/profile/api-tokens) and click **Create Token**.
 
-Then set _Zone Resouces_: include your domain and save the token on a .env in the same folder where the docker compose file is.
+- Choose the **Edit Zone DNS** template.
+- In the **Zone Resources** section, specify your domain.
+- Save the generated token to a `.env` file located in the same directory as your `docker-compose.yaml`.
 
-```.env
-CF_DNS_API_TOKEN=cloudflare_token
+```dotenv
+CF_DNS_API_TOKEN=your_cloudflare_token
 ```
 
-#### 2. Disable proxy (Proxied) for domains using Traefik:
+---
 
-Go to DNS -> Records in Cloudflare for your domain then create a new A or CNAME registers (Add Record) with _Proxy status: DNS only_ for your apps. Content can be any value like `192.168.1.100`, since DNS-01 only uses the domain, it does not test IP.
+#### 2. Disable Proxying for Domains Used by Traefik
+
+In the Cloudflare dashboard, go to **DNS → Records** for your domain.
+
+- Create a new **A** or **CNAME** record.
+- Set the **Proxy status** to **DNS only**.
+- For internal apps, you can use a placeholder IP such as `192.168.1.100`. The DNS-01 challenge does not require a valid public IP address.
+
+> Example:
+> `traefik.lik3.net → 192.168.1.100` with Proxy disabled.
 
 ![cloudflare DNS](../assets/cloudflare-dns.png)
 
-#### 3. Configure Traefik to use Let's Encrypt:
+---
+
+#### 3. Configure Traefik with Let's Encrypt DNS-01 (Cloudflare)
+
+Below is a sample configuration in your `docker-compose.yaml` for Traefik using Cloudflare DNS:
 
 ```yaml
 services:
@@ -173,7 +188,7 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "8080:8080" # Traefik dashboard
+      - "8080:8080" # Dashboard access
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /mnt/ssd/data/traefik:/data
@@ -192,16 +207,24 @@ networks:
     external: true
 ```
 
-#### 4. Give permission to `acme.json`:
+---
 
+#### 4. Prepare the `acme.json` File
+
+This file will store your certificates. Create and secure it with the following:
+
+```bash
+sudo touch <path to acme.json>
+sudo chmod 600 <path to acme.json>
 ```
-sudo touch /apps/traefik/data/acme.json
-sudo chmod 600 /apps/traefik/data/acme.json
-```
 
-#### 5. Add labels to your service/router:
+> ⚠️ in this case `<path to acme.json>` is `/mnt/ssd/data/traefik/acme.json`
 
-Example:
+---
+
+#### 5. Add Labels to Your Application Containers
+
+Here’s an example of how to expose a service with HTTPS:
 
 ```yaml
 services:
@@ -209,11 +232,10 @@ services:
     image: traefik/whoami
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.whoami.rule=Host(`home.like`)"
-      - "traefik.http.routers.whoami.entrypoints=web"
+      - "traefik.http.routers.whoami.rule=Host(`home.lik3.net`)"
       - "traefik.http.routers.whoami.entrypoints=websecure"
       - "traefik.http.routers.whoami.tls=true"
-      - "traefik.http.routers.myapp.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.whoami.tls.certresolver=cloudflare"
     networks:
       - traefik-net
 
