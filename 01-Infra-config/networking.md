@@ -277,4 +277,5 @@ Now open `http://home.like` in your browser.
 ---
 
 Next: [🚫 Pi-hole DNS Ad Blocker Setup](./pihole.md)
+
 Previous: [📡 Static IP setup](./static_ip.md)
