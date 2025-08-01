@@ -2,9 +2,9 @@
 
 [Excalidraw](https://github.com/excalidraw/excalidraw) is an open-source, virtual whiteboard that mimics a hand-drawn style.
 
-* ✏️ **Draw and brainstorm visually** in a freeform canvas
-* 🤝 **Collaborative** — share your board with others in real-time
-* 🔐 **End-to-End Encrypted** sessions for privacy
+- ✏️ **Draw and brainstorm visually** in a freeform canvas
+- 🤝 **Collaborative** — share your board with others in real-time
+- 🔐 **End-to-End Encrypted** sessions for privacy
 
 ---
 
@@ -61,6 +61,6 @@ http://excalidraw.like
 
 ### ✅ Tips
 
-* Use HTTPS with Traefik for secure collaboration if exposing it outside your LAN.
-* Excalidraw supports exporting boards to **.png**, **.svg**, and **.excalidraw** formats.
-* For collaborative mode, make sure your instance is reachable from all participants’ devices.
+- Use HTTPS with Traefik for secure collaboration if exposing it outside your LAN.
+- Excalidraw supports exporting boards to **.png**, **.svg**, and **.excalidraw** formats.
+- For collaborative mode, make sure your instance is reachable from all participants’ devices.
